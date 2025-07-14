@@ -5,6 +5,7 @@ from app.db.db_vault import VaultDB
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
 from flasgger import swag_from
+from api.auth.middleware import csrf_protection
 
 vault = Blueprint('vault', __name__)
 
@@ -38,7 +39,7 @@ vault = Blueprint('vault', __name__)
         }
     },
     'security': [
-        {'jwt': []}
+        {'Bearer': []}
     ]
 })
 def get_passwords():
@@ -73,8 +74,10 @@ def get_passwords():
         logging.error(f"Error listing passwords: {str(e)}")
         return jsonify({"error": "Internal Server Error"}), 500
 
+
 @vault.route('/passwords', methods=['POST'])
 @jwt_required()
+@csrf_protection(enabled=False)
 @swag_from({
     'parameters': [
         {
@@ -111,7 +114,7 @@ def get_passwords():
         }
     },
     'security': [
-        {'jwt': []}
+        {'Bearer': []}
     ]
 })
 def add_password():
@@ -204,7 +207,7 @@ def add_password():
         }
     },
     'security': [
-        {'jwt': []}
+        {'Bearer': []}
     ]
 })
 def get_password(password_id):
@@ -262,8 +265,10 @@ def get_password(password_id):
         logging.error(f"Error retrieving password: {str(e)}")
         return jsonify({"error": "Internal Server Error"}), 500
 
+
 @vault.route('/passwords/<int:password_id>', methods=['PUT'])
 @jwt_required()
+@csrf_protection(enabled=False)
 @swag_from({
     'parameters': [
         {
@@ -306,7 +311,7 @@ def get_password(password_id):
         }
     },
     'security': [
-        {'jwt': []}
+        {'Bearer': []}
     ]
 })
 def update_password(password_id):
@@ -376,8 +381,10 @@ def update_password(password_id):
         logging.error(f"Error updating password: {str(e)}")
         return jsonify({"error": "Internal Server Error"}), 500
 
+
 @vault.route('/passwords/<int:password_id>', methods=['DELETE'])
 @jwt_required()
+@csrf_protection(enabled=False)
 @swag_from({
     'parameters': [
         {
@@ -406,7 +413,7 @@ def update_password(password_id):
         }
     },
     'security': [
-        {'jwt': []}
+        {'Bearer': []}
     ]
 })
 def delete_password(password_id):
@@ -438,3 +445,5 @@ def delete_password(password_id):
     except Exception as e:
         logging.error(f"Error deleting password: {str(e)}")
         return jsonify({"error": "Internal Server Error"}), 500
+
+

@@ -108,11 +108,11 @@ class PasswordManagerCLI:
         password = getpass.getpass("Password: ")
         
         try:
-            if self.user_db.verify_user(username, password):
+            # Try using login_user first, which stores decrypted text
+            user = self.user_db.login_user(username, password)
+            
+            if user:
                 self.current_user = username
-                
-                # Get user data
-                user = self.user_db.get_user(username)
                 
                 # Initialize crypto manager with user's password and salt
                 self.crypto_manager = CryptoManager(password, user.salt)

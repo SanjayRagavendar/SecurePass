@@ -11,6 +11,7 @@ class User(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     username = Column(String(50), unique=True, nullable=False)
     encrypted_text = Column(String(255), nullable=False)
+    decrypted_text = Column(String(255), nullable=True)  
     salt = Column(LargeBinary(16), nullable=False)
     recovery_key_hash = Column(LargeBinary(50), nullable=False)
     created_at = Column(DateTime, default=datetime.now())
@@ -19,3 +20,9 @@ class User(Base):
     def check_encrypted_text(self, encrypted_text: str) -> bool:
         """Check if the provided encrypted text matches the stored one."""
         return self.encrypted_text == encrypted_text
+        
+    def check_decrypted_text(self, decrypted_text: str) -> bool:
+        """Check if the provided decrypted text matches the stored one."""
+        if self.decrypted_text is None:
+            return False
+        return self.decrypted_text == decrypted_text

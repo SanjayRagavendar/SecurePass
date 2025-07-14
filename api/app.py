@@ -6,6 +6,7 @@ from datetime import timedelta
 import os
 import logging
 from app.config import APP_Data, LOG_DIR
+from api.auth.blacklist import is_token_blacklisted, add_token_to_blacklist
 
 # Import blueprints
 from api.blueprints import api, vault
@@ -25,13 +26,33 @@ def create_app(testing=False):
     # Configure app
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'dev-secret-key')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+    app.config['JWT_TOKEN_LOCATION'] = ['cookies', 'headers']  # Allow both cookies and headers
     app.config['JWT_COOKIE_SECURE'] = not testing  # True in production
-    app.config['JWT_COOKIE_CSRF_PROTECT'] = not testing  # True in production
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # Disable CSRF for API usage
+    app.config['JWT_CSRF_IN_COOKIES'] = False
+    app.config['JWT_COOKIE_SAMESITE'] = 'Lax'  # Less restrictive for API usage
+    app.config['JWT_COOKIE_DOMAIN'] = None  # Restrict to same domain
+    app.config['JWT_HEADER_NAME'] = 'Authorization'
+    app.config['JWT_HEADER_TYPE'] = 'Bearer'
     
     # Initialize extensions
     jwt = JWTManager(app)
     CORS(app)
+    
+    # Token validity check
+    @jwt.token_in_blocklist_loader
+    def check_if_token_in_blacklist(jwt_header, jwt_payload):
+        jti = jwt_payload["jti"]
+        return is_token_blacklisted(jti)
+    
+    # Handle revoked tokens
+    @jwt.revoked_token_loader
+    def handle_revoked_token(jwt_header, jwt_payload):
+        return {
+            "error": "Token has been revoked",
+            "code": "token_revoked"
+        }, 401
     
     # Configure Swagger
     swagger_config = {
@@ -57,10 +78,11 @@ def create_app(testing=False):
             "version": "1.0.0"
         },
         "securityDefinitions": {
-            "jwt": {
+            "Bearer": {
                 "type": "apiKey",
                 "name": "Authorization",
-                "in": "header"
+                "in": "header",
+                "description": "JWT Authorization header using the Bearer scheme. Example: 'Authorization: Bearer {token}'"
             }
         },
     }

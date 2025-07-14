@@ -8,7 +8,6 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'users'
     
-    # For SQLite - store UUID as string
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     username = Column(String(50), unique=True, nullable=False)
     encrypted_text = Column(String(255), nullable=False)

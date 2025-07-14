@@ -63,6 +63,42 @@ class VaultDB:
         finally:
             session.close()
 
+    def get_password_by_id(self, password_id):
+        """Get a password entry by ID."""
+        if not self.Session:
+            return None
+            
+        session = self.Session()
+        try:
+            password = session.query(PasswordVault).filter_by(id=password_id).first()
+            return password
+        except Exception as e:
+            return None
+        finally:
+            session.close()
+    
+    def update_password(self, password_id, update_data):
+        """Update a password entry with new data."""
+        if not self.Session:
+            return False
+            
+        session = self.Session()
+        try:
+            password = session.query(PasswordVault).filter_by(id=password_id).first()
+            if not password:
+                return False
+                
+            for key, value in update_data.items():
+                setattr(password, key, value)
+                
+            session.commit()
+            return True
+        except Exception as e:
+            session.rollback()
+            return False
+        finally:
+            session.close()
+
     def update_password(self, website, new_password):
         if not self.Session:
             return False

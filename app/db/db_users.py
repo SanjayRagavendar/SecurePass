@@ -1,5 +1,4 @@
 import os
-import hashlib
 from app.config import DB_FILE, USERS_DIR
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -50,6 +49,17 @@ class UserDB:
         finally:
             session.close()
     
+    def get_user_by_id(self, user_id):
+        """Get user by ID."""
+        session = self.Session()
+        try:
+            user = session.query(User).filter_by(id=user_id).first()
+            return user
+        except Exception as e:
+            raise e
+        finally:
+            session.close()
+    
     def get_all_users(self):
         session = self.Session()
         try:
@@ -60,22 +70,20 @@ class UserDB:
         finally:
             session.close()
     
-    def verify_user(self, username, password):
+    def login_user(self, username, password):
         user = self.get_user(username)
         if not user:
-            return False
+            return None
         
         try:
-            # Create a crypto manager with the provided password and stored salt
             crypto_manager = CryptoManager(password, user.salt)
-            
-            # The encrypted_text acts as a verification token
             decrypted = crypto_manager.decrypt(user.encrypted_text.encode())
             
-            # If decryption succeeds, the password is correct
-            return True
+            if decrypted:
+                return user
+            return None
         except:
-            return False
+            return None
         
     def update_user(self, username, encrypted_text):
         session = self.Session()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Password Manager Server CLI
+Password Manager CLI
 A secure password management application with encrypted storage.
 """
 import os
@@ -22,14 +22,16 @@ def main():
         # Start the CLI
         cli = PasswordManagerCLI()
         cli.run()
+        return 0
     except ImportError as e:
         print(f"Error importing required modules: {e}")
         print("Make sure all dependencies are installed.")
+        return 1
     except Exception as e:
         print(f"Unexpected error: {e}")
         return 1
-    
-    return 0
 
 if __name__ == "__main__":
+    # For backwards compatibility, direct execution still works
+    print("Note: It's recommended to use 'python manage.py cli' instead.")
     sys.exit(main())

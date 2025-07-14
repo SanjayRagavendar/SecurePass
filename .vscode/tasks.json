@@ -2,13 +2,46 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run Password Manager",
+            "label": "Run Password Manager CLI",
             "type": "shell",
-            "command": "python main.py",
+            "command": "python manage.py cli",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run API Server (Development)",
+            "type": "shell",
+            "command": "python manage.py api --mode dev",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run API Server (Production)",
+            "type": "shell",
+            "command": "python manage.py api --mode prod",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Initialize System",
+            "type": "shell",
+            "command": "python setup.py",
+            "group": "build",
             "presentation": {
                 "reveal": "always",
                 "panel": "new"

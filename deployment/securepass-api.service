@@ -1,0 +1,17 @@
+[Unit]
+Description=SecurePass Password Manager API Server
+After=network.target
+
+[Service]
+User=securepass
+Group=securepass
+WorkingDirectory=/opt/securepass
+ExecStart=/usr/bin/python3 manage.py api --mode prod
+Restart=on-failure
+Environment=PORT=5000
+Environment=HOST=0.0.0.0
+Environment=GUNICORN_WORKERS=4
+Environment=JWT_SECRET_KEY=change_this_to_a_random_secure_key
+
+[Install]
+WantedBy=multi-user.target
